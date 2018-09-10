@@ -1,8 +1,8 @@
-import React, {Component} from 'react';
-import {View} from 'react-native';
-import cheerio from 'react-native-cheerio';
+import React, { Component } from 'react';
+import { View } from 'react-native';
 import { Screen, NavigationBar, Title, ListView, Tile, Subtitle, Divider } from '@shoutem/ui';
-import {displayName} from '../app.json';
+import { displayName } from '../app.json';
+import Parser from './Parser';
 
 class Forums extends Component {
   constructor(props) {
@@ -17,17 +17,28 @@ class Forums extends Component {
     fetch('https://www.bogleheads.org/forum/index.php')
       .then((response) => response.text())
       .then((responseText) => {
-        const document = cheerio.load(responseText);
-
-        /*this.setState({
-          isLoading: false,
-          dataSource: responseJson.movies,
-        }, function(){
-
-        });*/
-
-        console.log(responseText);
-
+        const parser = new Parser(responseText);
+        const forums = parser
+          .find('body', 0)
+          .find('div', 0)
+          .find('div', 1)
+          .find('div', 0)
+          .find('div', 0)
+          .find('ul', 1)
+          .find('li')
+          .map(item => {
+            item = item
+              .find('dl', 0)
+              .find('dt', 0)
+              .find('div', 0);
+            const link = item.find('a', 0);
+            return {
+              id: link.attr('href'),
+              title: link.text(),
+              description: item.text()
+            }
+          });
+        this.setState({ forums });
       });
   }
 
@@ -35,8 +46,8 @@ class Forums extends Component {
     return (
       <View>
         <Tile>
-          <Title styleName="md-gutter">COOL BLACK AND WHITE STYLISH WATCHES</Title>
-          <Subtitle styleName="sm-gutter">$280.00</Subtitle>
+          <Title styleName="md-gutter">{forum.title}</Title>
+          <Subtitle styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Subtitle>
         </Tile>
         <Divider styleName="line" />
       </View>
