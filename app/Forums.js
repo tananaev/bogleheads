@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { View } from 'react-native';
-import { Screen, NavigationBar, Title, ListView, Tile, Subtitle, Divider } from '@shoutem/ui';
+import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
 import { displayName } from '../app.json';
 import Parser from './Parser';
 
@@ -8,6 +7,7 @@ class Forums extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      error: null,
       forums: []
     }
     this.renderRow = this.renderRow.bind(this);
@@ -39,6 +39,9 @@ class Forums extends Component {
             }
           });
         this.setState({ forums });
+      })
+      .catch((error) => {
+        this.setState({ error });
       });
   }
 
@@ -47,7 +50,7 @@ class Forums extends Component {
       <View>
         <Tile>
           <Title styleName="md-gutter">{forum.title}</Title>
-          <Subtitle styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Subtitle>
+          <Text styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Text>
         </Tile>
         <Divider styleName="line" />
       </View>
@@ -55,15 +58,31 @@ class Forums extends Component {
   }
 
   render() {
-    const { forums } = this.state;
+    const { error, forums } = this.state;
+    let content;
+    if (!error && !forums.length) {
+      content = (
+        <Spinner styleName="large center xl-gutter-top" />
+      );
+    } else if (error) {
+      content = (
+        <View styleName="center xl-gutter-top">
+          <Title>Page error</Title>
+        </View>
+      );
+    } else {
+      content = (
+        <ListView
+          data={forums}
+          renderRow={this.renderRow} />
+      );
+    }
     return (
       <Screen>
         <NavigationBar
           title={displayName}
           styleName="inline" />
-        <ListView
-          data={forums}
-          renderRow={this.renderRow} />
+        {content}
       </Screen>
     );
   }
