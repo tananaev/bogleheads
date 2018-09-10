@@ -1,10 +1,10 @@
 import React, {Component} from 'react';
-import Forums from './Forums';
+import Topics from './Topics';
 
  class App extends Component {
   render() {
     return (
-      <Forums />
+      <Topics />
     );
   }
 }

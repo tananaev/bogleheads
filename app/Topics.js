@@ -1,0 +1,91 @@
+import React, { Component } from 'react';
+import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
+import { displayName } from '../app.json';
+import Parser from './Parser';
+
+class Topics extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      error: null,
+      topics: []
+    }
+    this.renderRow = this.renderRow.bind(this);
+  }
+
+  componentDidMount(){
+    fetch('https://www.bogleheads.org/forum/viewforum.php?f=1')
+      .then((response) => response.text())
+      .then((responseText) => {
+        const parser = new Parser(responseText);
+        const topics = parser
+          .find('body', 0)
+          .find('div', 0)
+          .find('div', 1)
+          .find('div', 3)
+          .find('div', 0)
+          .find('ul', 1)
+          .find('li')
+          .map(item => {
+            item = item
+              .find('dl', 0)
+              .find('dt', 0)
+              .find('div', 0);
+            const link = item.find('a', 0);
+            return {
+              id: link.attr('href'),
+              title: link.text(),
+              update: item.find('div', 0).find('a', 1).text()
+            }
+          });
+        this.setState({ topics });
+      })
+      .catch((error) => {
+        this.setState({ error });
+      });
+  }
+
+  renderRow(topic) {
+    return (
+      <View>
+        <Tile>
+          <Title styleName="md-gutter">{topic.title}</Title>
+          <Text styleName="md-gutter-horizontal md-gutter-bottom">{topic.update}</Text>
+        </Tile>
+        <Divider styleName="line" />
+      </View>
+    );
+  }
+
+  render() {
+    const { error, topics } = this.state;
+    let content;
+    if (!error && !topics.length) {
+      content = (
+        <Spinner styleName="large center xl-gutter-top" />
+      );
+    } else if (error) {
+      content = (
+        <View styleName="center xl-gutter-top">
+          <Title>Page error</Title>
+        </View>
+      );
+    } else {
+      content = (
+        <ListView
+          data={topics}
+          renderRow={this.renderRow} />
+      );
+    }
+    return (
+      <Screen>
+        <NavigationBar
+          title={displayName}
+          styleName="inline" />
+        {content}
+      </Screen>
+    );
+  }
+}
+
+export default Topics;
