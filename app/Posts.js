@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { XMLSerializer } from 'xmldom';
 import HTMLView from 'react-native-htmlview';
-import { Screen, Html, ListView, Tile, Title, Divider, Spinner, View, DropDownMenu } from '@shoutem/ui';
+import { Screen, ListView, Tile, Title, Subtitle, Divider, Spinner, View, DropDownMenu } from '@shoutem/ui';
 import Parser from './Parser';
 
 class Posts extends Component {
@@ -45,10 +45,12 @@ class Posts extends Component {
             item = item
               .find('div', 0)
               .find('div', 0)
-              .find('div', 0)
               .find('div', 0);
+            const header = item.find('p', 0);
             return {
-              html: serializer.serializeToString(item.element)
+              author: header.find('span', 0).find('strong', 0).find('a', 0).text(),
+              update: header.text(),
+              html: serializer.serializeToString(item.find('div', 0).element)
             }
           });
         this.setState({ posts });
@@ -72,8 +74,9 @@ class Posts extends Component {
   renderRow(post) {
     return (
       <View>
-        <Tile>
-          <Html body={post.html} />
+        <Tile styleName="md-gutter">
+          <Subtitle styleName="md-gutter-bottom">by {post.author}  >  {post.update}</Subtitle>
+          <HTMLView value={post.html} />
         </Tile>
         <Divider styleName="line" />
       </View>
