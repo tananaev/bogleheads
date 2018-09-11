@@ -1,12 +1,17 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { XMLSerializer } from 'xmldom';
-import { Screen, NavigationBar, Html, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
+import HTMLView from 'react-native-htmlview';
+import { Screen, Html, ListView, Tile, Title, Divider, Spinner, View, DropDownMenu } from '@shoutem/ui';
 import Parser from './Parser';
 
 class Posts extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: navigation.getParam('topicTitle')
+      headerTitle: (
+        <Title numberOfLines={1} style={{color: 'white'}} styleName="md-gutter-right">
+          {navigation.getParam('topicTitle')}
+        </Title>
+      )
     };
   };
 
@@ -16,6 +21,7 @@ class Posts extends Component {
       error: null,
       posts: []
     }
+    this.openPage = this.openPage.bind(this);
     this.renderRow = this.renderRow.bind(this);
   }
 
@@ -23,8 +29,9 @@ class Posts extends Component {
     const { navigation } = this.props;
     const forumId = navigation.getParam('forumId');
     const topicId = navigation.getParam('topicId');
+    const start = navigation.getParam('page') * 50;
     const serializer = new XMLSerializer();
-    fetch(`https://www.bogleheads.org/forum/viewtopic.php?f=${forumId}&t=${topicId}`)
+    fetch(`https://www.bogleheads.org/forum/viewtopic.php?f=${forumId}&t=${topicId}&start=${start}`)
       .then((response) => response.text())
       .then((responseText) => {
         const parser = new Parser(responseText);
@@ -51,6 +58,17 @@ class Posts extends Component {
       });
   }
 
+  openPage(index) {
+    const { navigation } = this.props;
+    navigation.replace('Posts', {
+      forumId: navigation.getParam('forumId'),
+      topicId: navigation.getParam('topicId'),
+      topicTitle: navigation.getParam('topicTitle'),
+      postCount: navigation.getParam('postCount'),
+      page: index
+    });
+  }
+
   renderRow(post) {
     return (
       <View>
@@ -62,9 +80,25 @@ class Posts extends Component {
     );
   }
 
-  render() {
+  createMenu() {
     const { navigation } = this.props;
+    const menu = [];
+    const page = navigation.getParam('page');
+    const count = Math.trunc(navigation.getParam('postCount') / 50);
+    const begin = Math.max(0, page - 5);
+    const end = Math.min(count, page + 5);
+    for (let i = begin; i <= end; i += 1) {
+      menu.push({
+        index: i,
+        name: `Page ${i + 1}`
+      });
+    }
+    return [menu, page - begin];
+  }
+
+  render() {
     const { error, posts } = this.state;
+    const [menu, index] = this.createMenu();
     let content;
     if (!error && !posts.length) {
       content = (
@@ -78,9 +112,20 @@ class Posts extends Component {
       );
     } else {
       content = (
-        <ListView
-          data={posts}
-          renderRow={this.renderRow} />
+        <Fragment>
+          <ListView
+            data={posts}
+            renderRow={this.renderRow} />
+          { menu.length > 1 &&
+            <DropDownMenu
+              styleName="horizontal"
+              options={menu}
+              selectedOption={menu[index]}
+              onOptionSelected={(page) => this.openPage(page.index)}
+              titleProperty="name"
+              valueProperty="index" />
+          }
+        </Fragment>
       );
     }
     return (

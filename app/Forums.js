@@ -1,11 +1,15 @@
 import React, { Component } from 'react';
-import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity } from '@shoutem/ui';
+import { Screen, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity } from '@shoutem/ui';
 import { displayName } from '../app.json';
 import Parser from './Parser';
 
 class Forums extends Component {
   static navigationOptions = {
-    title: displayName
+    headerTitle: (
+      <Title numberOfLines={1} style={{color: 'white'}} styleName="md-gutter-horizontal">
+        {displayName}
+      </Title>
+    )
   };
 
   constructor(props) {
@@ -32,15 +36,15 @@ class Forums extends Component {
           .find('ul', 1)
           .find('li')
           .map(item => {
-            item = item
-              .find('dl', 0)
-              .find('dt', 0)
-              .find('div', 0);
+            item = item.find('dl', 0);
+            const count = parseInt(item.find('dd', 0).text());
+            item = item.find('dt', 0).find('div', 0);
             const link = item.find('a', 0);
             return {
               id: link.attr('href').match(/f=\d+/g)[0].substring(2),
               title: link.text(),
-              description: item.text()
+              description: item.text(),
+              count: count
             }
           });
         this.setState({ forums });
@@ -53,7 +57,9 @@ class Forums extends Component {
   openForum(forum) {
     this.props.navigation.navigate('Topics', {
       forumId: forum.id,
-      forumTitle: forum.title
+      forumTitle: forum.title,
+      topicCount: forum.count,
+      page: 0
     });
   }
 

@@ -1,11 +1,15 @@
-import React, { Component } from 'react';
-import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity } from '@shoutem/ui';
+import React, { Component, Fragment } from 'react';
+import { Screen, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity, DropDownMenu } from '@shoutem/ui';
 import Parser from './Parser';
 
 class Topics extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: navigation.getParam('forumTitle')
+      headerTitle: (
+        <Title numberOfLines={1} style={{color: 'white'}} styleName="md-gutter-right">
+          {navigation.getParam('forumTitle')}
+        </Title>
+      )
     };
   };
 
@@ -15,13 +19,16 @@ class Topics extends Component {
       error: null,
       topics: []
     }
+    this.openPage = this.openPage.bind(this);
+    this.openTopic = this.openTopic.bind(this);
     this.renderRow = this.renderRow.bind(this);
   }
 
-  componentDidMount(){
+  componentDidMount() {
     const { navigation } = this.props;
     const forumId = navigation.getParam('forumId');
-    fetch(`https://www.bogleheads.org/forum/viewforum.php?f=${forumId}`)
+    const start = navigation.getParam('page') * 50;
+    fetch(`https://www.bogleheads.org/forum/viewforum.php?f=${forumId}&start=${start}`)
       .then((response) => response.text())
       .then((responseText) => {
         const parser = new Parser(responseText);
@@ -34,15 +41,15 @@ class Topics extends Component {
           .find('ul', 1)
           .find('li')
           .map(item => {
-            item = item
-              .find('dl', 0)
-              .find('dt', 0)
-              .find('div', 0);
+            item = item.find('dl', 0);
+            const count = parseInt(item.find('dd', 0).text()) + 1;
+            item = item.find('dt', 0).find('div', 0);
             const link = item.find('a', 0);
             return {
               id: link.attr('href').match(/t=\d+/g)[0].substring(2),
               title: link.text(),
-              update: item.find('div', 0).find('a', 1).text()
+              update: item.find('div', 0).find('a', 1).text(),
+              count: count
             }
           });
         this.setState({ topics });
@@ -52,12 +59,24 @@ class Topics extends Component {
       });
   }
 
+  openPage(index) {
+    const { navigation } = this.props;
+    navigation.replace('Topics', {
+      forumId: navigation.getParam('forumId'),
+      forumTitle: navigation.getParam('forumTitle'),
+      topicCount: navigation.getParam('topicCount'),
+      page: index
+    });
+  }
+
   openTopic(topic) {
     const { navigation } = this.props;
-    this.props.navigation.navigate('Posts', {
+    navigation.navigate('Posts', {
       forumId: navigation.getParam('forumId'),
       topicId: topic.id,
-      topicTitle: topic.title
+      topicTitle: topic.title,
+      postCount: topic.count,
+      page: 0
     });
   }
 
@@ -75,9 +94,25 @@ class Topics extends Component {
     );
   }
 
-  render() {
+  createMenu() {
     const { navigation } = this.props;
+    const menu = [];
+    const page = navigation.getParam('page');
+    const count = Math.trunc(navigation.getParam('topicCount') / 50);
+    const begin = Math.max(0, page - 5);
+    const end = Math.min(count, page + 5);
+    for (let i = begin; i <= end; i += 1) {
+      menu.push({
+        index: i,
+        name: `Page ${i + 1}`
+      });
+    }
+    return [menu, page - begin];
+  }
+
+  render() {
     const { error, topics } = this.state;
+    const [menu, index] = this.createMenu();
     let content;
     if (!error && !topics.length) {
       content = (
@@ -91,9 +126,20 @@ class Topics extends Component {
       );
     } else {
       content = (
-        <ListView
-          data={topics}
-          renderRow={this.renderRow} />
+        <Fragment>
+          <ListView
+            data={topics}
+            renderRow={this.renderRow} />
+          { menu.length > 1 &&
+            <DropDownMenu
+              styleName="horizontal"
+              options={menu}
+              selectedOption={menu[index]}
+              onOptionSelected={(page) => this.openPage(page.index)}
+              titleProperty="name"
+              valueProperty="index" />
+          }
+        </Fragment>
       );
     }
     return (
