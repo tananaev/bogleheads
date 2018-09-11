@@ -3,6 +3,12 @@ import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, V
 import Parser from './Parser';
 
 class Topics extends Component {
+  static navigationOptions = ({ navigation }) => {
+    return {
+      title: navigation.getParam('forumTitle'),
+    };
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -92,9 +98,6 @@ class Topics extends Component {
     }
     return (
       <Screen>
-        <NavigationBar
-          title={navigation.getParam('forumTitle')}
-          styleName="inline" />
         {content}
       </Screen>
     );

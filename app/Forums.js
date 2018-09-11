@@ -4,6 +4,10 @@ import { displayName } from '../app.json';
 import Parser from './Parser';
 
 class Forums extends Component {
+  static navigationOptions = {
+    title: displayName,
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -89,9 +93,6 @@ class Forums extends Component {
     }
     return (
       <Screen>
-        <NavigationBar
-          title={displayName}
-          styleName="inline" />
         {content}
       </Screen>
     );
