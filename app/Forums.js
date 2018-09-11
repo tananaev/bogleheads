@@ -5,7 +5,7 @@ import Parser from './Parser';
 
 class Forums extends Component {
   static navigationOptions = {
-    title: displayName,
+    title: displayName
   };
 
   constructor(props) {

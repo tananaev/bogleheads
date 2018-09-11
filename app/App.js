@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import React, { Component, Fragment } from 'react';
+import { StatusBar } from 'react-native';
 import { createStackNavigator } from 'react-navigation';
 import Forums from './Forums';
 import Topics from './Topics';
@@ -9,12 +10,28 @@ const RootStack = createStackNavigator({
   Topics,
   Posts
 }, {
-  initialRouteName: 'Forums'
+  initialRouteName: 'Forums',
+  navigationOptions: {
+    headerStyle: {
+      backgroundColor: '#1565C0'
+    },
+    headerTintColor: '#FFFFFF',
+    headerTitleStyle: {
+      fontWeight: 'normal'
+    }
+  }
 });
 
 class App extends Component {
   render() {
-    return <RootStack />;
+    return (
+      <Fragment>
+        <StatusBar
+          backgroundColor="#0D47A1"
+          barStyle="light-content" />
+        <RootStack />
+      </Fragment>
+    );
   }
 }
 

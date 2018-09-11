@@ -6,7 +6,7 @@ import Parser from './Parser';
 class Posts extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title: navigation.getParam('topicTitle'),
+      title: navigation.getParam('topicTitle')
     };
   };
 
