@@ -80,11 +80,11 @@ class Topics extends Component {
     });
   }
 
-  renderRow(topic) {
+  renderRow(topic, _, rowId) {
     return (
       <View>
         <TouchableOpacity onPress={() => this.openTopic(topic)}>
-          <Tile>
+          <Tile style={{backgroundColor: (parseInt(rowId) & 1) ? '#ECF3F7' : '#E1EBF2'}}>
             <Title styleName="md-gutter">{topic.title}</Title>
             <Text styleName="md-gutter-horizontal md-gutter-bottom">{topic.update}</Text>
           </Tile>

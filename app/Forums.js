@@ -63,16 +63,15 @@ class Forums extends Component {
     });
   }
 
-  renderRow(forum) {
+  renderRow(forum, _, rowId) {
     return (
       <View>
         <TouchableOpacity onPress={() => this.openForum(forum)}>
-          <Tile>
+          <Tile style={{backgroundColor: (parseInt(rowId) & 1) ? '#ECF3F7' : '#E1EBF2'}}>
             <Title styleName="md-gutter">{forum.title}</Title>
             <Text styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Text>
           </Tile>
         </TouchableOpacity>
-        <Divider styleName="line" />
       </View>
     );
   }

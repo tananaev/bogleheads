@@ -71,10 +71,10 @@ class Posts extends Component {
     });
   }
 
-  renderRow(post) {
+  renderRow(post, _, rowId) {
     return (
       <View>
-        <Tile styleName="md-gutter">
+        <Tile styleName="md-gutter" style={{backgroundColor: (parseInt(rowId) & 1) ? '#ECF3F7' : '#E1EBF2'}}>
           <Subtitle styleName="md-gutter-bottom">by {post.author}  >  {post.update}</Subtitle>
           <HTMLView value={post.html} />
         </Tile>
