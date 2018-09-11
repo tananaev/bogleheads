@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { XMLSerializer } from 'xmldom';
 import { Screen, NavigationBar, Html, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
-import { displayName } from '../app.json';
 import Parser from './Parser';
 
 class Posts extends Component {
@@ -15,8 +14,11 @@ class Posts extends Component {
   }
 
   componentDidMount(){
+    const { navigation } = this.props;
+    const forumId = navigation.getParam('forumId');
+    const topicId = navigation.getParam('topicId');
     const serializer = new XMLSerializer();
-    fetch('https://www.bogleheads.org/forum/viewtopic.php?f=1&t=258371')
+    fetch(`https://www.bogleheads.org/forum/viewtopic.php?f=${forumId}&t=${topicId}`)
       .then((response) => response.text())
       .then((responseText) => {
         const parser = new Parser(responseText);
@@ -47,7 +49,7 @@ class Posts extends Component {
     return (
       <View>
         <Tile>
-          <Html body={post.html} onError={(error) => {}} />
+          <Html body={post.html} />
         </Tile>
         <Divider styleName="line" />
       </View>
@@ -55,6 +57,7 @@ class Posts extends Component {
   }
 
   render() {
+    const { navigation } = this.props;
     const { error, posts } = this.state;
     let content;
     if (!error && !posts.length) {
@@ -77,7 +80,7 @@ class Posts extends Component {
     return (
       <Screen>
         <NavigationBar
-          title={displayName}
+          title={navigation.getParam('topicTitle')}
           styleName="inline" />
         {content}
       </Screen>

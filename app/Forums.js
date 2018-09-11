@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
+import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity } from '@shoutem/ui';
 import { displayName } from '../app.json';
 import Parser from './Parser';
 
@@ -10,6 +10,7 @@ class Forums extends Component {
       error: null,
       forums: []
     }
+    this.openForum = this.openForum.bind(this);
     this.renderRow = this.renderRow.bind(this);
   }
 
@@ -33,7 +34,7 @@ class Forums extends Component {
               .find('div', 0);
             const link = item.find('a', 0);
             return {
-              id: link.attr('href'),
+              id: link.attr('href').match(/f=\d+/g)[0].substring(2),
               title: link.text(),
               description: item.text()
             }
@@ -45,13 +46,22 @@ class Forums extends Component {
       });
   }
 
+  openForum(forum) {
+    this.props.navigation.navigate('Topics', {
+      forumId: forum.id,
+      forumTitle: forum.title
+    });
+  }
+
   renderRow(forum) {
     return (
       <View>
-        <Tile>
-          <Title styleName="md-gutter">{forum.title}</Title>
-          <Text styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Text>
-        </Tile>
+        <TouchableOpacity onPress={() => this.openForum(forum)}>
+          <Tile>
+            <Title styleName="md-gutter">{forum.title}</Title>
+            <Text styleName="md-gutter-horizontal md-gutter-bottom">{forum.description}</Text>
+          </Tile>
+        </TouchableOpacity>
         <Divider styleName="line" />
       </View>
     );

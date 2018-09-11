@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
-import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View } from '@shoutem/ui';
-import { displayName } from '../app.json';
+import { Screen, NavigationBar, Text, ListView, Tile, Title, Divider, Spinner, View, TouchableOpacity } from '@shoutem/ui';
 import Parser from './Parser';
 
 class Topics extends Component {
@@ -14,7 +13,9 @@ class Topics extends Component {
   }
 
   componentDidMount(){
-    fetch('https://www.bogleheads.org/forum/viewforum.php?f=1')
+    const { navigation } = this.props;
+    const forumId = navigation.getParam('forumId');
+    fetch(`https://www.bogleheads.org/forum/viewforum.php?f=${forumId}`)
       .then((response) => response.text())
       .then((responseText) => {
         const parser = new Parser(responseText);
@@ -33,7 +34,7 @@ class Topics extends Component {
               .find('div', 0);
             const link = item.find('a', 0);
             return {
-              id: link.attr('href'),
+              id: link.attr('href').match(/t=\d+/g)[0].substring(2),
               title: link.text(),
               update: item.find('div', 0).find('a', 1).text()
             }
@@ -45,19 +46,31 @@ class Topics extends Component {
       });
   }
 
+  openTopic(topic) {
+    const { navigation } = this.props;
+    this.props.navigation.navigate('Posts', {
+      forumId: navigation.getParam('forumId'),
+      topicId: topic.id,
+      topicTitle: topic.title
+    });
+  }
+
   renderRow(topic) {
     return (
       <View>
-        <Tile>
-          <Title styleName="md-gutter">{topic.title}</Title>
-          <Text styleName="md-gutter-horizontal md-gutter-bottom">{topic.update}</Text>
-        </Tile>
+        <TouchableOpacity onPress={() => this.openTopic(topic)}>
+          <Tile>
+            <Title styleName="md-gutter">{topic.title}</Title>
+            <Text styleName="md-gutter-horizontal md-gutter-bottom">{topic.update}</Text>
+          </Tile>
+        </TouchableOpacity>
         <Divider styleName="line" />
       </View>
     );
   }
 
   render() {
+    const { navigation } = this.props;
     const { error, topics } = this.state;
     let content;
     if (!error && !topics.length) {
@@ -80,7 +93,7 @@ class Topics extends Component {
     return (
       <Screen>
         <NavigationBar
-          title={displayName}
+          title={navigation.getParam('forumTitle')}
           styleName="inline" />
         {content}
       </Screen>
