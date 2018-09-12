@@ -1,5 +1,7 @@
 import { DOMParser } from 'xmldom';
 
+const TEXT_NODE = 3;
+
 class Parser {
   constructor(element) {
     if (typeof element === 'string' || element instanceof String) {
@@ -27,7 +29,7 @@ class Parser {
   text() {
     return Array
       .from(this.element.childNodes)
-      .filter(node => node.constructor.name === 'Text')
+      .filter(node => node.nodeType === TEXT_NODE)
       .join('')
       .trim();
   }

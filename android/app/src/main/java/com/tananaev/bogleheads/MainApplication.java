@@ -1,7 +1,8 @@
-package com.bogleheads;
+package com.tananaev.bogleheads;
 
 import android.app.Application;
 
+import com.tananaev.bogleheads.BuildConfig;
 import com.facebook.react.ReactApplication;
 import com.reactnative.photoview.PhotoViewPackage;
 import com.BV.LinearGradient.LinearGradientPackage;

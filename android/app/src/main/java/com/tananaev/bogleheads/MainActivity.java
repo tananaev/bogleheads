@@ -1,4 +1,4 @@
-package com.bogleheads;
+package com.tananaev.bogleheads;
 
 import com.facebook.react.ReactActivity;
 
